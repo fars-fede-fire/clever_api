@@ -1,0 +1,16 @@
+{
+  "domain": "clever_api",
+  "name": "Clever API",
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/clever_api",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": [
+    "@fars-fede-ferie"
+  ],
+  "iot_class": "cloud_polling",
+  "version": "0.0.1"
+}
