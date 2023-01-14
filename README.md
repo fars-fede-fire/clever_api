@@ -8,3 +8,4 @@ Unofficial Clever API
 I take no responsibility in using this custom component
 
 This is a pre-alpha release - a lot of work is still to be done!
+Expect breaking changes
