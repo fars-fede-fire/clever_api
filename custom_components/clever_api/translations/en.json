@@ -11,8 +11,13 @@
         "step": {
             "user": {
                 "data": {
+                    "email": "Clever email"
+                }
+            },
+            "url": {
+                "data": {
                     "email": "Clever email",
-                    "url": "URL"
+                    "url": "Confirmation URL from Clever"
                 }
             }
         }

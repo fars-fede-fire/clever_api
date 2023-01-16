@@ -3,8 +3,7 @@
     "step": {
       "user": {
         "data": {
-          "email": "Email to login to Clever",
-          "url": "URL to confirm Login to Clever App"
+          "email": "Email to login to Clever"
         }
       }
     },
