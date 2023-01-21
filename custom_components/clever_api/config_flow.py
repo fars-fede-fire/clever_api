@@ -7,11 +7,11 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries, exceptions, core
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN  # pylint:disable=unused-import
 from .login import Login
+from .clever import Clever
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,8 +26,9 @@ _LOGGER = logging.getLogger(__name__)
 # quite work as documented and always gave me the "Lokalise key references" string
 # (in square brackets), rather than the actual translated value. I did not attempt to
 # figure this out or look further into it.
-DATA_SCHEMA = vol.Schema({vol.Optional("email"): str})
-URL_SCHEMA = vol.Schema({vol.Optional("email"): str, vol.Required("url"): str})
+DATA_SCHEMA = vol.Schema({vol.Required("email"): str})
+URL_SCHEMA = vol.Schema({vol.Required("email"): str, vol.Required("url"): str, vol.Required("chargebox", default=False): bool})
+
 
 
 async def send_email(data, hass):
@@ -44,6 +45,13 @@ async def obtain_api_key(data, hass):
     login = Login(session, data["email"])
     api_key = await login.exchange_secretCode(data["url"])
     return api_key
+
+async def get_charger_id(api_key, hass):
+    """Get chargebox id and connector id."""
+    session = async_get_clientsession(hass)
+    clever = Clever(session, api_key)
+    charger_info = await clever.get_charger_id()
+    return charger_info
 
 
 class CleverAPIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -92,10 +100,15 @@ class CleverAPIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             api_key = await obtain_api_key(user_input, self.hass)
             user_input["api_key"] = api_key
-            return self.async_create_entry(title="Clever API", data=user_input)
+            if user_input["chargebox"] == True:
+                chargebox_info = await get_charger_id(api_key, self.hass)
+                user_input["charge_box_id"] = chargebox_info["data"][0]["chargeBoxId"]
+                user_input["connector_id"] = chargebox_info["data"][0]["connectorId"]
+                return self.async_create_entry(title="Clever API", data=user_input)
+            if user_input["chargebox"] == False:
+                return self.async_create_entry(title="Clever API", data=user_input)
 
         return self.async_show_form(step_id="url", data_schema=URL_SCHEMA)
-
 
 class CannotConnect(exceptions.HomeAssistantError):
     """Error to indicate we cannot connect."""

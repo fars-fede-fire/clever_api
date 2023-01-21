@@ -22,6 +22,16 @@ class Clever:
 
         return await resp.json()
 
+    async def get_charger_id(self) -> ClientResponse:
+        """Get chargeBoxId connectorId"""
+        resp = await self.websession.request(
+            "get",
+            f"https://mobileapp-backend.clever.dk/api//v3/{self.api_key}/installations?",
+            headers=self.headers,
+        )
+
+        return await resp.json()
+
 
 class Home:
     """API calls to Clever charger at home"""
@@ -35,11 +45,13 @@ class Home:
 
     async def get_charger_state(self) -> ClientResponse:
         """Get current state of home charger"""
-        return await self.websession.request(
+        resp = await self.websession.request(
             "get",
             f"https://mobileapp-backend.clever.dk/api//v4/transactions/{self.api_key}/{self.charge_box_id}/connector/{self.connector}?chargepointId={self.charge_box_id}&connector={self.connector}",
             headers=self.headers,
         )
+
+        return await resp.json()
 
     async def enable_climate_start(self):
         """Enable climate start"""

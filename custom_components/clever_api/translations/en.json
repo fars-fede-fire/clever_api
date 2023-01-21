@@ -1,25 +1,26 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "cannot_connect": "Failed to connect",
-            "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "email": "Clever email"
-                }
-            },
-            "url": {
-                "data": {
-                    "email": "Clever email",
-                    "url": "Confirmation URL from Clever"
-                }
-            }
-        }
-    }
+  "config": {
+      "abort": {
+          "already_configured": "Device is already configured"
+      },
+      "error": {
+          "cannot_connect": "Failed to connect",
+          "invalid_auth": "Invalid authentication",
+          "unknown": "Unexpected error"
+      },
+      "step": {
+          "user": {
+              "data": {
+                  "email": "Clever email"
+              }
+          },
+          "url": {
+              "data": {
+                  "email": "Clever email",
+                  "url": "Confirmation URL from Clever",
+                  "chargebox": "Add Clever home charger"
+              }
+          }
+      }
+  }
 }
