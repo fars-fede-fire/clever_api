@@ -11,6 +11,12 @@ from homeassistant.helpers.typing import (
     ConfigType,
     DiscoveryInfoType,
 )
+from homeassistant.const import (
+    ATTR_VOLTAGE,
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_ILLUMINANCE,
+    ENERGY_KILO_WATT_HOUR,
+)
 
 from .clever import Clever
 
@@ -47,6 +53,9 @@ async def async_setup_platform(
 
 class CleverTransactions(Entity):
     """Representation of Clever Transactions sensor."""
+
+    device_class = DEVICE_CLASS_ENERGY
+    _attr_unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
     def __init__(self, clever: Clever):
         super().__init__()

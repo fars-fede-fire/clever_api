@@ -3,3 +3,6 @@ custom_components/clever_api/clever/__pycache__/__init__.cpython-39.pyc
 custom_components/clever_api/__pycache__/__init__.cpython-39.pyc
 custom_components/clever_api/__pycache__/config_flow.cpython-39.pyc
 custom_components/clever_api/__pycache__/const.cpython-39.pyc
+custom_components/clever_api/login/__pycache__/__init__.cpython-39.pyc
+.vscode/extensions.json
+.vscode/settings.default.json
