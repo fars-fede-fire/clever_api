@@ -65,7 +65,7 @@ class CleverHomeChargerEnergy(Entity):
         super().__init__()
         self.home = home
         self._site_data = None
-        self._attr_name = "Current session consumption"
+        self._attr_name = "Clever current session consumption"
         self._state = None
         self._available = True
         self._last_upd = None
