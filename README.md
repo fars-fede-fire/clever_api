@@ -1,5 +1,5 @@
 # Clever API
-Custom component for Clever EV charger
+Home Assistant custom component for Clever EV charger
 
 First flow screen is your Clever email
 Second flow screen is your Clever email and second line is the conformation URL.

@@ -84,8 +84,8 @@ class CleverHomeChargerEnergy(Entity):
     async def async_update(self):
         data = await self.home.get_charger_state()
         self._last_upd = data["timestamp"]
-        if type(data["data"]["consumedWh"]) is float:
-            self._state = float(data["data"]["consumedWh"]/1_000)
+        if data["data"]["consumedWh"] is not "Unknown":
+            self._state = round(float(data["data"]["consumedWh"]/1_000), 2)
         else:
             self._state = 0
 
@@ -128,4 +128,4 @@ class CleverTransactions(Entity):
             if item["startTimeUtc"] >= start_of_month_in_ms:
                 kwh_this_month += item["kWh"]
 
-        self._state = kwh_this_month
+        self._state = round(kwh_this_month, 2)
