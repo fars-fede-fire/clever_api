@@ -83,8 +83,9 @@ class CleverHomeChargerEnergy(Entity):
 
     async def async_update(self):
         data = await self.home.get_charger_state()
+        print(data)
         self._last_upd = data["timestamp"]
-        if data["data"]["consumedWh"] is not "Unknown":
+        if data["status"] == "true":
             self._state = round(float(data["data"]["consumedWh"]/1_000), 2)
         else:
             self._state = 0
