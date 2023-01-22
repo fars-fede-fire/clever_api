@@ -10,6 +10,12 @@ I take no responsibility in using this custom component
 This is a pre-alpha release - a lot of work is still to be done!
 Expect breaking changes
 
+When the custom component is loaded you will have:
+ - sensor.clever_consumption_this_month: How many kWh you have charged at home and at public chargers  
+
+ If you check "Add Clever home charger", you will have access to:
+ - sensor.clever_current_session_consumption: How many kWh your home charger has charged since car was connect. This is only updated every 15 minutes from Clever  
+
 Login flow:
 
 1) Insert your Clever email  
@@ -24,5 +30,3 @@ Press 'send'
 
 4) Insert your Clever mail again and paste the URL  
 ![Login picture 4](https://github.com/fars-fede-fire/clever_api/blob/main/cleverfoto/login2.PNG)
-
-You will now have a sensor named: sensor.clever_consumption_this_month
