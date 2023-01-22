@@ -2,7 +2,7 @@
   "domain": "clever_api",
   "name": "Clever API",
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/integrations/clever_api",
+  "documentation": "https://github.com/fars-fede-fire/clever_api",
   "requirements": [],
   "ssdp": [],
   "zeroconf": [],
