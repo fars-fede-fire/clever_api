@@ -34,7 +34,7 @@ async def async_setup_entry(
     session = async_get_clientsession(hass)
     clever = Clever(session, config["api_key"])
     sensors = [CleverTransactions(clever)]
-    if config["charge_box_id"] is not None:
+    if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
     async_add_entities(sensors, update_before_add=True)
@@ -49,7 +49,7 @@ async def async_setup_platform(
     session = async_get_clientsession(hass)
     clever = Clever(session, config["api_key"])
     sensors = [CleverTransactions(clever)]
-    if config["charge_box_id"] is not None:
+    if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
     async_add_entities(sensors, update_before_add=True)
