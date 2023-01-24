@@ -3,6 +3,8 @@ from datetime import timedelta, datetime
 
 from typing import Callable, Optional
 
+import logging
+
 from homeassistant import core, config_entries
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
@@ -24,6 +26,8 @@ from .const import (
 
 SCAN_INTERVAL = timedelta(seconds=60)
 
+_LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(
     hass: core.HomeAssistant,
@@ -37,6 +41,7 @@ async def async_setup_entry(
     if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
+        _LOGGER.debug(f"charge_box_id: {config['charge_box_id']}, connector_id: {config['connector_id']}")
     async_add_entities(sensors, update_before_add=True)
 
 
@@ -84,6 +89,7 @@ class CleverHomeChargerEnergy(Entity):
     async def async_update(self):
         data = await self.home.get_charger_state()
         self._last_upd = data["timestamp"]
+        _LOGGER.debug(f"{data}")
         if data["data"]["consumedWh"] is not "Unknown":
             self._state = round(float(data["data"]["consumedWh"]/1_000), 2)
         else:
@@ -124,6 +130,7 @@ class CleverTransactions(Entity):
         start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_of_month_in_ms = start_of_month.timestamp() * 1_000_000
         kwh_this_month = 0
+        _LOGGER.debug(f"{transaction_data}")
         for item in transaction_data["data"]["consumptionRecords"]:
             if item["startTimeUtc"] >= start_of_month_in_ms:
                 kwh_this_month += item["kWh"]
