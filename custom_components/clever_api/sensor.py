@@ -58,6 +58,7 @@ async def async_setup_platform(
     if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
+        sensors.append(CleverHomeChargerStatus(home))
     async_add_entities(sensors, update_before_add=True)
 
 
@@ -91,7 +92,7 @@ class CleverHomeChargerEnergy(Entity):
         data = await self.home.get_charger_state()
         self._last_upd = data["timestamp"]
         _LOGGER.debug(f"{data}")
-        if data["status"] == "true":
+        if data["status"] == True:
             self._state = round(float(data["data"]["consumedWh"]/1_000), 2)
         else:
             self._state = 0
@@ -123,7 +124,7 @@ class CleverHomeChargerStatus(Entity):
         data = await self.home.get_charger_state()
         self._last_upd = data["timestamp"]
         _LOGGER.debug(f"{data}")
-        if data["status"] == "true":
+        if data["status"] == True:
             self._state = data["data"]["status"]
         else:
             self._state = "Unplugged"
