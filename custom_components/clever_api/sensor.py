@@ -39,6 +39,7 @@ async def async_setup_entry(
     clever = Clever(session, config["api_key"])
     sensors = [CleverTransactions(clever)]
     if config["chargebox"] == True:
+    if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
         _LOGGER.debug(f"charge_box_id: {config['charge_box_id']}, connector_id: {config['connector_id']}")
@@ -90,7 +91,7 @@ class CleverHomeChargerEnergy(Entity):
         data = await self.home.get_charger_state()
         self._last_upd = data["timestamp"]
         _LOGGER.debug(f"{data}")
-        if data["data"]["consumedWh"] is not "Unknown":
+        if data["status"] == "true":
             self._state = round(float(data["data"]["consumedWh"]/1_000), 2)
         else:
             self._state = 0
