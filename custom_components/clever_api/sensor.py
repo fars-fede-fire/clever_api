@@ -39,7 +39,6 @@ async def async_setup_entry(
     clever = Clever(session, config["api_key"])
     sensors = [CleverTransactions(clever)]
     if config["chargebox"] == True:
-    if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
         _LOGGER.debug(f"charge_box_id: {config['charge_box_id']}, connector_id: {config['connector_id']}")
