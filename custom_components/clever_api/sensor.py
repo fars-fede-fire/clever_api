@@ -3,6 +3,8 @@ from datetime import timedelta, datetime
 
 from typing import Callable, Optional
 
+import logging
+
 from homeassistant import core, config_entries
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
@@ -24,6 +26,8 @@ from .const import (
 
 SCAN_INTERVAL = timedelta(seconds=60)
 
+_LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(
     hass: core.HomeAssistant,
@@ -37,6 +41,8 @@ async def async_setup_entry(
     if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
+        sensors.append(CleverHomeChargerStatus(home))
+        _LOGGER.debug(f"charge_box_id: {config['charge_box_id']}, connector_id: {config['connector_id']}")
     async_add_entities(sensors, update_before_add=True)
 
 
@@ -52,6 +58,7 @@ async def async_setup_platform(
     if config["chargebox"] == True:
         home = Home(session, config["api_key"], config["charge_box_id"], config["connector_id"])
         sensors.append(CleverHomeChargerEnergy(home))
+        sensors.append(CleverHomeChargerStatus(home))
     async_add_entities(sensors, update_before_add=True)
 
 
@@ -84,10 +91,43 @@ class CleverHomeChargerEnergy(Entity):
     async def async_update(self):
         data = await self.home.get_charger_state()
         self._last_upd = data["timestamp"]
-        if data["status"] == "true":
+        _LOGGER.debug(f"{data}")
+        if data["status"] == True:
             self._state = round(float(data["data"]["consumedWh"]/1_000), 2)
         else:
             self._state = 0
+
+class CleverHomeChargerStatus(Entity):
+    """Representation of Clever current charging session """
+
+    def __init__(self, home: Home):
+        super().__init__()
+        self.home = home
+        self._site_data = None
+        self._attr_name = "Clever current charger status"
+        self._state = None
+        self._available = True
+        self._last_upd = None
+
+    @property
+    def state(self):
+        return self._state
+
+    @property
+    def extra_state_attributes(self):
+        """Return other details about the sensor state."""
+        attrs = {}
+        attrs["last_updated_server_timestamp"] = self._last_upd
+        return attrs
+
+    async def async_update(self):
+        data = await self.home.get_charger_state()
+        self._last_upd = data["timestamp"]
+        _LOGGER.debug(f"{data}")
+        if data["status"] == True:
+            self._state = data["data"]["status"]
+        else:
+            self._state = "Unplugged"
 
 
 
@@ -124,6 +164,7 @@ class CleverTransactions(Entity):
         start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_of_month_in_ms = start_of_month.timestamp() * 1_000_000
         kwh_this_month = 0
+        _LOGGER.debug(f"{transaction_data}")
         for item in transaction_data["data"]["consumptionRecords"]:
             if item["startTimeUtc"] >= start_of_month_in_ms:
                 kwh_this_month += item["kWh"]
