@@ -1,5 +1,4 @@
 {
-    "name": "Integration blueprint",
-    "render_readme": true,
-    "homeassistant": "2022.2.0"
+    "name": "Clever API",
+    "render_readme": true
 }

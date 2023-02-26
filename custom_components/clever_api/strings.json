@@ -1,0 +1,12 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Send Clever authorization email",
+                "data": {
+                    "email": "[%key:common::config_flow::data::email%]"
+                }
+            }
+        }
+    }
+}

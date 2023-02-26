@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Send Clever authorization email",
+                "data": {
+                    "email": "Email"
+                }
+            },
+            "url": {
+                "title": "Insert confirmation url from Clever",
+                "data": {
+                    "url": "URL"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "domain": "clever_api",
+    "name": "Clever API",
+    "codeowners": [
+        "@fars-fede-fire"
+    ],
+    "documentation": "https://github.com/fars-fede-fire/clever_api",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/fars-fede-fire/clever_api/issues",
+    "requirements": [
+        "pydantic==1.10"
+    ],
+    "config_flow": true,
+    "version": "0.2.0"
+}
