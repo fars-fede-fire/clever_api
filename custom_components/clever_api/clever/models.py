@@ -125,6 +125,8 @@ class EvseInfoData(BaseModel, extra=Extra.ignore):
 
 
 class EvseStateData(BaseModel, extra=Extra.ignore):
+    """Object holding Evse data"""
+
     transaction_id: int = Field(..., alias="transactionId")
     timestamp: str
     status: str

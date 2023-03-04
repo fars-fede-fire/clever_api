@@ -12,6 +12,18 @@
                 "data": {
                     "url": "URL"
                 }
+            },
+            "box": {
+                "title": "Clever Home Charger",
+                "data": {
+                    "box": "Add a Clever Home Charger?"
+                }
+            },
+            "misc": {
+                "title": "Clever subscription fee",
+                "data": {
+                    "subscription_fee": "Insert fee"
+                }
             }
         }
     }

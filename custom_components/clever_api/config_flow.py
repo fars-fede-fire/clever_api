@@ -8,11 +8,21 @@ from homeassistant.const import CONF_EMAIL, CONF_API_KEY, CONF_API_TOKEN
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, LOGGER, CONF_URL
+from .const import (
+    DOMAIN,
+    LOGGER,
+    CONF_URL,
+    CONF_BOX,
+    CONF_BOX_ID,
+    CONF_CONNECTOR_ID,
+    CONF_SUBSCRIPTION_FEE,
+)
 from .clever.clever import Util, Auth, Subscription, Evse
 
 EMAIL_SCHEMA = vol.Schema({vol.Required(CONF_EMAIL): str})
 URL_SCHEMA = vol.Schema({vol.Required(CONF_URL): str})
+BOX_SCHEMA = vol.Schema({vol.Required(CONF_BOX): bool})
+MISC_SCHEMA = vol.Schema({vol.Optional(CONF_SUBSCRIPTION_FEE, default=799): int})
 
 
 class CleverApiFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -28,6 +38,11 @@ class CleverApiFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     last_name: str
     secret_code: str
     user_secret: str
+    customer_id: str
+    add_box: bool
+    box_charge_id: int = None
+    box_connector_id: int = None
+    subscription_fee: float = None
 
     def __init__(self) -> None:
         """Initialize Clever API flow"""
@@ -79,7 +94,22 @@ class CleverApiFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 secret_code=self.secret_code,
             )
             LOGGER.debug(resp)
-            self.user_secret = resp.data["userSecret"]
+            self.api_token = resp.data["userSecret"]
+
+            resp = await auth.obtain_api_token(
+                user_secret=self.api_token, email=self.email
+            )
+            LOGGER.debug(resp)
+
+            self.api_key = resp.data
+
+            sub = Subscription(session=session, api_token=self.api_key)
+
+            user_data = await sub.get_user_info()
+
+            self.customer_id = user_data.data.customer_id
+
+            await self.async_set_unique_id(self.customer_id)
 
             return await self.async_step_box()
 
@@ -91,4 +121,47 @@ class CleverApiFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Setup Clever EVSE"""
-        return True
+
+        errors = {}
+
+        if user_input is not None:
+            self.add_box = user_input[CONF_BOX]
+            if self.add_box is True:
+                session = async_get_clientsession(self.hass)
+                sub = Subscription(session=session, api_token=self.api_key)
+                resp = await sub.get_evse_info()
+
+                self.box_charge_id = resp.data[0].installation_id
+                self.box_connector_id = resp.data[0].charge_box_id
+
+            return await self.async_step_misc()
+
+        return self.async_show_form(
+            step_id="box", data_schema=BOX_SCHEMA, errors=errors
+        )
+
+    async def async_step_misc(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle extra steps in setup"""
+
+        errors = {}
+
+        if user_input is not None:
+            self.subscription_fee = user_input[CONF_SUBSCRIPTION_FEE]
+
+            data = {
+                CONF_API_KEY: self.api_key,
+                CONF_API_TOKEN: self.api_token,
+                CONF_EMAIL: self.email,
+                CONF_BOX: self.add_box,
+                CONF_BOX_ID: self.box_charge_id,
+                CONF_CONNECTOR_ID: self.box_connector_id,
+                CONF_SUBSCRIPTION_FEE: self.subscription_fee,
+            }
+
+            return self.async_create_entry(title=self.email, data=data)
+
+        return self.async_show_form(
+            step_id="misc", data_schema=MISC_SCHEMA, errors=errors
+        )
