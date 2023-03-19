@@ -237,7 +237,6 @@ class CleverApiEvseSensorEntity(CleverApiEvseEntity, SensorEntity):
     @property
     def native_value(self) -> float:
         """Return sensor value."""
-        LOGGER.debug(self.entity_description.value_fn(self.coordinator.data))
         return self.entity_description.value_fn(self.coordinator.data)
 
     @property

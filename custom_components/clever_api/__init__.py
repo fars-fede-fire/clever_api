@@ -42,8 +42,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Setup Clever API device from config entry."""
 
     if entry.data[CONF_BOX] is True:
-        LOGGER.debug(EVSE_PLATFORMS)
-
         evse_coordinator = CleverApiEvseUpdateCoordinator(hass, entry)
         await evse_coordinator.async_config_entry_first_refresh()
 
@@ -53,7 +51,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         async def enable_flex(call: ServiceCall) -> None:
             """Service to enable flex charging."""
-            LOGGER.debug(call.data[CONF_DEPT_TIME])
             if (
                 evse_coordinator.data.evse_info.data[0].smart_charging_is_enabled
                 is not True
@@ -64,7 +61,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     dept_time=call.data[CONF_DEPT_TIME],
                     kwh=call.data[CONF_DESIRED_RANGE],
                 )
-                LOGGER.debug(str(resp))
             else:
                 await evse_coordinator.evse.set_dept_time(
                     dept_time=call.data[CONF_DEPT_TIME]
@@ -84,8 +80,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.services.async_register(DOMAIN, SERVICE_DISABLE_FLEX, disable_flex)
 
         return True
-
-    LOGGER.debug(EVSE_PLATFORMS)
 
     sub_coordinator = CleverApiSubscriptionUpdateCoordinator(hass, entry)
     await sub_coordinator.async_config_entry_first_refresh()

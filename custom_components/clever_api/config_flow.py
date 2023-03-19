@@ -83,7 +83,6 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             resp = await auth.verify_link(auth_link=self.url, email=self.email)
 
-            LOGGER.debug(resp)
             self.first_name = resp.data["firstName"]
             self.last_name = resp.data["lastName"]
             self.secret_code = resp.secret_code
@@ -94,13 +93,11 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 last_name=self.last_name,
                 secret_code=self.secret_code,
             )
-            LOGGER.debug(resp)
             self.api_token = resp.data["userSecret"]
 
             resp = await auth.obtain_api_token(
                 user_secret=self.api_token, email=self.email
             )
-            LOGGER.debug(resp)
 
             self.api_key = resp.data
 
