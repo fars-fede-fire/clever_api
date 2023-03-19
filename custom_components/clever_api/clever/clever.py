@@ -23,6 +23,7 @@ from .models import (
     ObtainApiToken,
     UserInfo,
     Transactions,
+    ModTransactions,
     EvseInfo,
     EvseState,
     Energitillaeg,
@@ -150,18 +151,61 @@ class Subscription(Clever):
         model = UserInfo.parse_obj(resp)
         return model
 
-    async def get_transactions(self) -> Transactions:
+    async def get_transactions(self, box_id=None) -> Transactions:
         """Get charging transactions"""
         url = f"https://mobileapp-backend.clever.dk/api//v2/consumption/{self.api_token}/history"
         resp = await self._request(url)
         model = Transactions.parse_obj(resp)
-        return model
+        today = datetime.today()
+        start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        start_of_month_in_ms = start_of_month.timestamp() * 1_000_000
+        kwh_this_month = 0
+        for item in model.data.consumption_records:
+            if item.start_time_utc >= start_of_month_in_ms:
+                kwh_this_month += item.k_wh
+        last_registered_transaction = datetime.fromtimestamp(
+            (model.data.consumption_records[-1].stop_time_local) / 1_000_000
+        )
+
+        if box_id is not None:
+            kwh_this_month_box = 0
+            for item in model.data.consumption_records:
+                if item.start_time_utc >= start_of_month_in_ms:
+                    if item.charge_point_id == box_id:
+                        kwh_this_month_box += item.k_wh
+
+            return_model = ModTransactions.parse_obj(
+                {
+                    "kwh_this_month": kwh_this_month,
+                    "kwh_this_month_box": kwh_this_month_box,
+                    "last_charge": last_registered_transaction,
+                }
+            )
+
+            return return_model
+
+        return_model = ModTransactions.parse_obj(
+            {
+                "kwh_this_month": kwh_this_month,
+                "kwh_this_month_box": None,
+                "last_charge": last_registered_transaction,
+            }
+        )
+
+        return return_model
 
     async def get_evse_info(self) -> EvseInfo:
         """Get info about EVSE"""
         url = f"https://mobileapp-backend.clever.dk/api//v3/{self.api_token}/installations?"
         resp = await self._request(url)
         model = EvseInfo.parse_obj(resp)
+        return model
+
+    async def get_energitillaeg(self) -> Energitillaeg:
+        """Get energitillaeg."""
+        url = f"https://mobileapp-backend.clever.dk/api/v3/energysurcharge/{self.api_token}/estimatedenergysurcharge?"
+        resp = await self._request(url)
+        model = Energitillaeg.parse_obj(resp)
         return model
 
 
@@ -192,7 +236,9 @@ class Evse(Clever):
                 "desiredRange": {"range": kwh},
             }
 
-            await self._request(url, method=METH_POST, data=data)
+            resp = await self._request(url, method=METH_POST, data=data)
+
+            return resp
         else:
             url = f"https://mobileapp-backend.clever.dk/api//v3/flex/{self.api_token}/chargepoints/{self.box_id}/connectors/{self.connector_id}/enable?"
             data = {"enable": False}
@@ -234,33 +280,3 @@ class Evse(Clever):
         url = f"https://mobileapp-backend.clever.dk/api//v3/flex/{self.api_token}/chargepoints/{self.box_id}/connectors/{self.connector_id}/schedule"
         data = {"time": dept_time}
         await self._request(url, method=METH_POST, data=data)
-
-
-class Util(Clever):
-    """Get data without authentication."""
-
-    async def get_energitillaeg(self) -> Energitillaeg:
-        """Calculate Energitillæg from spot prices"""
-        url = str(
-            "https://api.energidataservice.dk/dataset/Elspotprices?offset=0&start=StartOfMonth&end=StartOfMonth+P1M&filter=%7B%22PriceArea%22:[%22DK1%22,%22DK2%22]%7D&sort=HourDK%20DESC&timezone=dk"
-        )
-        resp = await self._request(url)
-        spotprice_sum = 0
-        for price in resp["records"]:
-            spotprice_sum += price["SpotPriceDKK"]
-
-        last_day_included = (
-            datetime.fromisoformat(resp["records"][0]["HourDK"])
-        ).date()
-
-        spotprice_total = resp["total"]
-        # Divide by 1_000 to get in kr/kWh
-        raw_energitillaeg = (spotprice_sum / spotprice_total) / 1_000
-
-        model = Energitillaeg.parse_obj(
-            {
-                "raw_energitillaeg": raw_energitillaeg,
-                "last_day_included": last_day_included,
-            }
-        )
-        return model

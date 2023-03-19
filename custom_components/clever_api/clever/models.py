@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from typing import Any, Optional, List
-from datetime import date
+from datetime import datetime
 
 from pydantic import BaseModel, Field, Extra
 
@@ -90,6 +90,14 @@ class Transactions(CleverBase):
     data: TransactionsData
 
 
+class ModTransactions(BaseModel):
+    """Object holding modified transactions."""
+
+    kwh_this_month: float
+    kwh_this_month_box: float
+    last_charge: datetime
+
+
 class EvseInfoDataSmartChargeUserConfig(BaseModel, extra=Extra.ignore):
     """Object holding user configuration of smart charge"""
 
@@ -98,7 +106,7 @@ class EvseInfoDataSmartChargeUserConfig(BaseModel, extra=Extra.ignore):
     departure_time: Any = Field(..., alias="departureTime")
     desired_range: Any = Field(..., alias="desiredRange")
     configured_effect: Any = Field(..., alias="configuredEffect")
-    preheat_in_minutes: int = Field(..., alias="preheatInMinutes")
+    preheat_in_minutes: Any = Field(..., alias="preheatInMinutes")
     rules: List
 
 
@@ -152,8 +160,15 @@ class EvseFlexActivate(CleverBase):
     """Object holding response when flex activated"""
 
 
-class Energitillaeg(BaseModel):
+class EnergitillaegData(BaseModel, extra=Extra.ignore):
+    """Object holding data of Energitillaeg."""
+
+    start_date: str = Field(..., alias="startDate")
+    end_date: str = Field(..., alias="endDate")
+    energy_surcharge_price_dkk: float = Field(..., alias="energySurchargePriceDkk")
+
+
+class Energitillaeg(CleverBase):
     """Object holding energitillaeg object."""
 
-    raw_energitillaeg: float
-    last_day_included: date
+    data: EnergitillaegData

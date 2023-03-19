@@ -2,44 +2,116 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    LOGGER,
+    CONF_BOX,
+    CONF_DEPT_TIME,
+    CONF_PHASE_COUNT,
+    CONF_DESIRED_RANGE,
+    SERVICE_ENABLE_FLEX,
+    SERVICE_DISABLE_FLEX,
+)
 
-# from .device import CleverApiDevice
+from .coordinator import (
+    CleverApiSubscriptionUpdateCoordinator,
+    CleverApiEvseUpdateCoordinator,
+)
+from .clever.clever import Evse
 
+SUB_PLATFORMS = [Platform.SENSOR]
+EVSE_PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH]
 
-@dataclass
-class CleverApiData:
-    """Class for sharing data within Clever API integration."""
-
-    devices: dict = field(default_factory=dict)
-
-
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Setup Clever API integration."""
-    hass.data[DOMAIN] = CleverApiData()
-    return True
+SERVICE_ENABLE_FLEX_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_DEPT_TIME): cv.string,
+        vol.Required(CONF_DESIRED_RANGE): cv.positive_int,
+        vol.Required(CONF_PHASE_COUNT): cv.positive_int,
+    }
+)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Setup Clever API device from config entry."""
 
-    device = CleverApiDevice(hass, entry)
+    if entry.data[CONF_BOX] is True:
+        LOGGER.debug(EVSE_PLATFORMS)
 
-    return await device.async_setup()
+        evse_coordinator = CleverApiEvseUpdateCoordinator(hass, entry)
+        await evse_coordinator.async_config_entry_first_refresh()
+
+        hass.data.setdefault(DOMAIN, {})[entry.entry_id] = evse_coordinator
+
+        await hass.config_entries.async_forward_entry_setups(entry, EVSE_PLATFORMS)
+
+        async def enable_flex(call: ServiceCall) -> None:
+            """Service to enable flex charging."""
+            LOGGER.debug(call.data[CONF_DEPT_TIME])
+            if (
+                evse_coordinator.data.evse_info.data[0].smart_charging_is_enabled
+                is not True
+            ):
+                resp = await evse_coordinator.evse.set_flex(
+                    enable=True,
+                    effect=call.data[CONF_PHASE_COUNT],
+                    dept_time=call.data[CONF_DEPT_TIME],
+                    kwh=call.data[CONF_DESIRED_RANGE],
+                )
+                LOGGER.debug(str(resp))
+            else:
+                await evse_coordinator.evse.set_dept_time(
+                    dept_time=call.data[CONF_DEPT_TIME]
+                )
+                await evse_coordinator.evse.set_kwh(kwh=call.data[CONF_DESIRED_RANGE])
+
+            await evse_coordinator.async_refresh()
+
+        async def disable_flex(call: ServiceCall) -> None:
+            """Service to disable flex charging."""
+            await evse_coordinator.evse.set_flex(enable=False)
+            await evse_coordinator.async_refresh()
+
+        hass.services.async_register(
+            DOMAIN, SERVICE_ENABLE_FLEX, enable_flex, schema=SERVICE_ENABLE_FLEX_SCHEMA
+        )
+        hass.services.async_register(DOMAIN, SERVICE_DISABLE_FLEX, disable_flex)
+
+        return True
+
+    LOGGER.debug(EVSE_PLATFORMS)
+
+    sub_coordinator = CleverApiSubscriptionUpdateCoordinator(hass, entry)
+    await sub_coordinator.async_config_entry_first_refresh()
+
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = sub_coordinator
+    await hass.config_entries.async_forward_entry_setups(entry, SUB_PLATFORMS)
+
+    return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Clever API config entry."""
 
-    data = hass.data[DOMAIN]
+    if entry.data[CONF_BOX] is True:
+        unload_ok = await hass.config_entries.async_unload_platforms(
+            entry, EVSE_PLATFORMS
+        )
+        if unload_ok:
+            hass.data[DOMAIN].pop(entry.entry_id)
+        if not hass.data[DOMAIN]:
+            hass.services.async_remove(DOMAIN, SERVICE_ENABLE_FLEX)
+            hass.services.async_remove(DOMAIN, SERVICE_DISABLE_FLEX)
+            del hass.data[DOMAIN]
 
-    device = data.devices.pop(entry.entry_id)
-    result = await device.async_unload()
-
-    return result
+    if unload_ok := await hass.config_entries.async_unload_platforms(
+        entry, SUB_PLATFORMS
+    ):
+        del hass.data[DOMAIN][entry.entry_id]
+    return unload_ok

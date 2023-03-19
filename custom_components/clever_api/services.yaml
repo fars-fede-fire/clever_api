@@ -1,0 +1,35 @@
+enable_flex:
+  name: Enable Intelligent Opladning
+  description: Enable Intelligent Opladning
+  fields:
+    depature_time:
+      name: Depature Time
+      description: Depature time in format hh:mm
+      required: true
+      example: 07:00
+      selector:
+        text:
+          type: text
+    desired_range:
+      name: Desired Range
+      description: Desired range in kWh
+      required: true
+      example: 30
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: integer
+          unit_of_measurement: kWh
+          mode: box
+    phase_count:
+      name: Phase Count
+      description: Number of phases used for charging
+      required: true
+      example: 3
+      selector:
+        number:
+          min: 0
+          max: 3
+          step: integer
+          mode: box

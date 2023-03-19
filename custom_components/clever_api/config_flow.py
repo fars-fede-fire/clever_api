@@ -13,11 +13,12 @@ from .const import (
     LOGGER,
     CONF_URL,
     CONF_BOX,
+    CONF_USER_ID,
     CONF_BOX_ID,
     CONF_CONNECTOR_ID,
     CONF_SUBSCRIPTION_FEE,
 )
-from .clever.clever import Util, Auth, Subscription, Evse
+from .clever.clever import Auth, Subscription
 
 EMAIL_SCHEMA = vol.Schema({vol.Required(CONF_EMAIL): str})
 URL_SCHEMA = vol.Schema({vol.Required(CONF_URL): str})
@@ -25,7 +26,7 @@ BOX_SCHEMA = vol.Schema({vol.Required(CONF_BOX): bool})
 MISC_SCHEMA = vol.Schema({vol.Optional(CONF_SUBSCRIPTION_FEE, default=799): int})
 
 
-class CleverApiFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle Clever API config flow"""
 
     VERSION = 1
@@ -131,8 +132,8 @@ class CleverApiFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 sub = Subscription(session=session, api_token=self.api_key)
                 resp = await sub.get_evse_info()
 
-                self.box_charge_id = resp.data[0].installation_id
-                self.box_connector_id = resp.data[0].charge_box_id
+                self.box_charge_id = resp.data[0].charge_box_id
+                self.box_connector_id = resp.data[0].connector_id
 
             return await self.async_step_misc()
 
@@ -154,6 +155,7 @@ class CleverApiFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_API_KEY: self.api_key,
                 CONF_API_TOKEN: self.api_token,
                 CONF_EMAIL: self.email,
+                CONF_USER_ID: self.customer_id,
                 CONF_BOX: self.add_box,
                 CONF_BOX_ID: self.box_charge_id,
                 CONF_CONNECTOR_ID: self.box_connector_id,

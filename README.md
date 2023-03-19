@@ -1,47 +1,82 @@
-# Notice
 
-The component and platforms in this repository are not meant to be used by a
-user, but as a "blueprint" that custom component developers can build
-upon, to make more awesome stuff.
+# Clever API
 
-HAVE FUN! 😎
+Home Assistant custom component for Clever EV charger
 
-## Why?
 
-This is simple, by having custom_components look (README + structure) the same
-it is easier for developers to help each other and for users to start using them.
 
-If you are a developer and you want to add things to this "blueprint" that you think more
-developers will have use for, please open a PR to add it :)
+First flow screen is your Clever email
 
-## What?
+Second flow screen is is the conformation URL.
 
-This repository contains multiple files, here is a overview:
 
-File | Purpose | Documentation
+
+Unofficial Clever API
+
+I take no responsibility in using this custom component
+
+
+
+This is a beta release - a lot of work is still to be done!
+
+Expect breaking changes
+
+
+
+
+### Entities
+
+Entity | Type | Description
 -- | -- | --
-`.devcontainer.json` | Used for development/testing with Visual Studio Code. | [Documentation](https://code.visualstudio.com/docs/remote/containers)
-`.github/ISSUE_TEMPLATE/*.yml` | Templates for the issue tracker | [Documentation](https://help.github.com/en/github/building-a-strong-community/configuring-issue-templates-for-your-repository)
-`.vscode/tasks.json` | Tasks for the devcontainer. | [Documentation](https://code.visualstudio.com/docs/editor/tasks)
-`custom_components/integration_blueprint/*` | Integration files, this is where everything happens. | [Documentation](https://developers.home-assistant.io/docs/creating_component_index)
-`CONTRIBUTING.md` | Guidelines on how to contribute. | [Documentation](https://help.github.com/en/github/building-a-strong-community/setting-guidelines-for-repository-contributors)
-`LICENSE` | The license file for the project. | [Documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/licensing-a-repository)
-`README.md` | The file you are reading now, should contain info about the integration, installation and configuration instructions. | [Documentation](https://help.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax)
-`requirements.txt` | Python packages used for development/lint/testing this integration. | [Documentation](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
+`sensor.clever_energitillaeg` | Sensor | Energitillæg for this month fetched from Clevers server.
+`sensor.clever_energy_this_month` | Sensor | Accumulated kWh this month. Be aware that it counts from when charger is plugged in, not precise when charging over night at shift in month.
+`sensor.clever_estimated_total_price_this_month` | Sensor | Estimated price for energitillæg this month (energitillæg * total consumption this month).
 
-## How?
 
-1. Create a new repository in GitHub, using this repository as a template by clicking the "Use this template" button in the GitHub UI.
-1. Open your new repository in Visual Studio Code devcontainer (Preferably with the "`Dev Containers: Clone Repository in Named Container Volume...`" option).
-1. Rename all instances of the `integration_blueprint` to `custom_components/<your_integration_domain>` (e.g. `custom_components/awesome_integration`).
-1. Rename all instances of the `Integration Blueprint` to `<Your Integration Name>` (e.g. `Awesome Integration`).
-1. Run the `scrtipts/develop` to start HA and test out your new integration.
+### Entities with home charger
+Entity | Type | Description
+-- | -- | --
+`sensor.clever_energitillaeg` | Sensor | Energitillæg for this month fetched from Clevers server.
+`sensor.clever_energy_this_month` | Sensor | Accumulated kWh this month. Be aware that it counts from when charger is plugged in, not precise when charging over night at shift in month.
+`sensor.clever_estimated_total_price_this_month` | Sensor | Estimated price for energitillæg this month (energitillæg * total consumption this month).
+`sensor.clever_energy_this_month_on_box` | Sensor | Accumulated kWh this month from home charger. Be aware that it counts from when charger is plugged in, not precise when charging over night at shift in month.
+`sensor.clever_energy_this_charging_session` | Sensor | Amount of charged kWh since car was connect. Update approximately every 5 minutes. Is 0 when unplugged.
+`sensor.clever_state_of_charger` | Sensor | Current state of the charger.
+`binary_sensor.clever_intelligent_opladning` | Binary sensor | Intelligent opladning turned on or off.
+`switch.clever_preheat` | Switch | Allow preheat when Intelligent opladning is turned on.
+`switch.clever_skip_intelligent_opladning` | Switch | Skip Intelligent opladning for this session or until turned off.
 
-## Next steps
+### Services with home charger
+Service| Data| Description
+-- | -- | --
+`clever_api.enable_flex` | depature_time: format "hh:mm", desired_range: integer in kWh, phase_count: integer in available phases | Setup Intelligent opladning.
+`clever_api.disable_flex` | None| Disable Intelligent opladning.
 
-These are some next steps you may want to look into:
-- Add tests to your integration, [`pytest-homeassistant-custom-component`](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component) can help you get started.
-- Add brand images (logo/icon) to https://github.com/home-assistant/brands.
-- Create your first release.
-- Share your integration on the [Home Assistant Forum](https://community.home-assistant.io/).
-- Submit your integration to the [HACS](https://hacs.xyz/docs/publish/start).
+Login flow:
+
+
+
+1) Insert your Clever email
+
+![Login picture 1](https://github.com/fars-fede-fire/clever_api/blob/main/cleverfoto/login1.PNG)
+
+Press 'send'
+
+
+
+2) You will now recieve a email from Clever asking you to confirm login. Open this email and press the 'bekræft' button
+
+![Login picture 2](https://github.com/fars-fede-fire/clever_api/blob/main/cleverfoto/clevermail.PNG)
+
+
+
+3) Copy the URL
+
+![Login picture 3](https://github.com/fars-fede-fire/clever_api/blob/main/cleverfoto/cleverurl.PNG)
+
+
+
+4) Insert your Clever mail again and paste the URL
+
+![Login picture 4](https://github.com/fars-fede-fire/clever_api/blob/main/cleverfoto/login2.PNG)
+

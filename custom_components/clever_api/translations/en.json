@@ -26,5 +26,15 @@
                 }
             }
         }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Clever Home Charger",
+                "data": {
+                    "box": "Add a Clever Home Charger?"
+                }
+            }
+        }
     }
 }
