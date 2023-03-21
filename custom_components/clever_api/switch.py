@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from asyncio import sleep
 from collections.abc import Callable, Awaitable
 from dataclasses import dataclass
 from typing import Any
@@ -53,8 +54,8 @@ SWITCHES = [
         key="skip_io",
         name="Skip Intelligent Opladning",
         icon="mdi:fast-forward",
-        is_on_fn=lambda x: x.evse_state,
-        set_fn=lambda client, enable: client.set_climate(enable=enable),
+        is_on_fn=lambda x: x.evse_state.data.charging_plan.boost_status.is_boosted,
+        set_fn=lambda client, enable: client.set_unlimited_boost(enable=enable),
     ),
 ]
 
@@ -98,9 +99,11 @@ class CleverApiEvseSwitchEntity(CleverApiEvseEntity, SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn entity on"""
         await self.entity_description.set_fn(self.coordinator.evse, True)
+        await sleep(2)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn entity off"""
         await self.entity_description.set_fn(self.coordinator.evse, False)
+        await sleep(2)
         await self.coordinator.async_refresh()

@@ -132,6 +132,20 @@ class EvseInfoData(BaseModel, extra=Extra.ignore):
     )
 
 
+class EvseStateDataChargingPlanBoostStatus(BaseModel, extra=Extra.ignore):
+    """Object holding Evse data charging plan boost status"""
+
+    is_boosted: bool = Field(..., alias="isBoosted")
+    boosted_at: Any = Field(..., alias="boostedAt")
+    duration_in_minutes: Any = Field(..., alias="durationInMinutes")
+
+
+class EvseStateDataChargingPlan(BaseModel, extra=Extra.ignore):
+    """Object holding Evse data charging plan"""
+
+    boost_status: EvseStateDataChargingPlanBoostStatus = Field(..., alias="boostStatus")
+
+
 class EvseStateData(BaseModel, extra=Extra.ignore):
     """Object holding Evse data"""
 
@@ -142,6 +156,7 @@ class EvseStateData(BaseModel, extra=Extra.ignore):
     started: str
     postponed_until: str = Field(..., alias="postponedUntil")
     so_c: int = Field(..., alias="soC")
+    charging_plan: EvseStateDataChargingPlan = Field(..., alias="chargingPlan")
 
 
 class EvseState(CleverBase):

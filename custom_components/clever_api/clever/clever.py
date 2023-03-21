@@ -254,10 +254,13 @@ class Evse(Clever):
             url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/settings/preheat?enable=false"
             await self._request(url, method=METH_POST)
 
-    async def set_unlimited_boost(self) -> None:
+    async def set_unlimited_boost(self, enable: bool = None) -> None:
         """Skip smart charging for this session"""
-        url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/boost?"
-        await self._request(url, method=METH_POST)
+        if enable is True:
+            url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/boost?"
+            await self._request(url, method=METH_POST)
+        else:
+            await self.disable_boost()
 
     async def set_timed_boost(self) -> None:
         """Skip smart charging for 30 minutes"""
