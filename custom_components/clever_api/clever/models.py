@@ -124,10 +124,12 @@ class EvseInfoData(BaseModel, extra=Extra.ignore):
     installation_id: str = Field(..., alias="installationId")
     charge_box_id: str = Field(..., alias="chargeBoxId")
     connector_id: int = Field(..., alias="connectorId")
-    smart_charging_is_enabled: bool = Field(..., alias="smartChargingIsEnabled")
-    smart_charging_version: str = Field(..., alias="smartChargingVersion")
-    smart_charging_data: Any = Field(..., alias="smartChargingData")
-    smart_charging_configuration: EvseInfoDataSmartCharge = Field(
+    smart_charging_is_enabled: Optional[bool] = Field(
+        ..., alias="smartChargingIsEnabled"
+    )
+    smart_charging_version: Optional[str] = Field(..., alias="smartChargingVersion")
+    smart_charging_data: Optional[Any] = Field(..., alias="smartChargingData")
+    smart_charging_configuration: Optional[EvseInfoDataSmartCharge] = Field(
         ..., alias="smartChargingConfiguration"
     )
 

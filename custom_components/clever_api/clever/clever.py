@@ -29,6 +29,8 @@ from .models import (
     Energitillaeg,
 )
 
+from ..const import LOGGER
+
 
 @dataclass
 class Clever:
@@ -198,6 +200,7 @@ class Subscription(Clever):
         """Get info about EVSE"""
         url = f"https://mobileapp-backend.clever.dk/api//v3/{self.api_token}/installations?"
         resp = await self._request(url)
+        LOGGER.debug("get_evse_info: %s", resp)
         model = EvseInfo.parse_obj(resp)
         return model
 
