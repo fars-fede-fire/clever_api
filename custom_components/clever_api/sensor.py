@@ -213,7 +213,13 @@ class CleverApiSubscriptionSensorEntity(CleverApiSubscriptionEntity, SensorEntit
 
     @property
     def extra_state_attributes(self):
-        return self.entity_description.attr_fn(self.coordinator.data)
+        if self.entity_description.attr_name is not None:
+            return {
+                self.entity_description.attr_name: self.entity_description.attr_fn(
+                    self.coordinator.data
+                )
+            }
+        return None
 
 
 class CleverApiEvseSensorEntity(CleverApiEvseEntity, SensorEntity):
