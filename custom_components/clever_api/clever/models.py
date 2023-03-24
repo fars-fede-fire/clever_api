@@ -94,7 +94,7 @@ class ModTransactions(BaseModel):
     """Object holding modified transactions."""
 
     kwh_this_month: float
-    kwh_this_month_box: float
+    kwh_this_month_box: float | None
     last_charge: datetime
 
 
