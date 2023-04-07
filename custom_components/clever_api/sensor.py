@@ -82,10 +82,16 @@ SUBSCRIPTION_SENSORS = [
         name="Estimated total price this month",
         device_class=SensorDeviceClass.MONETARY,
         native_unit_of_measurement="DKK",
-        value_fn=lambda x: x.transactions.kwh_this_month
-        * x.energitillaeg.data.energy_surcharge_price_dkk,
-        attr_fn=None,
-        attr_name=None,
+        value_fn=lambda x: (
+            x.transactions.kwh_this_month
+            * x.energitillaeg.data.energy_surcharge_price_dkk
+        )
+        + x.sub_fee,
+        attr_fn=lambda x: (
+            x.transactions.kwh_this_month
+            * x.energitillaeg.data.energy_surcharge_price_dkk
+        ),
+        attr_name="energitillaeg",
     ),
 ]
 
@@ -129,9 +135,13 @@ EVSE_SENSORS = [
         value_fn=lambda x: (
             x.transactions.kwh_this_month
             * x.energitillaeg.data.energy_surcharge_price_dkk
+        )
+        + x.sub_fee,
+        attr_fn=lambda x: (
+            x.transactions.kwh_this_month
+            * x.energitillaeg.data.energy_surcharge_price_dkk
         ),
-        attr_fn=None,
-        attr_name=None,
+        attr_name="energitillaeg",
     ),
     CleverApiEvseEntityDescription(
         key="evse_energy",

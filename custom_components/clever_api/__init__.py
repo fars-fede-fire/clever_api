@@ -16,6 +16,7 @@ from .const import (
     CONF_DEPT_TIME,
     CONF_PHASE_COUNT,
     CONF_DESIRED_RANGE,
+    CONF_IO_ENABLED,
     SERVICE_ENABLE_FLEX,
     SERVICE_DISABLE_FLEX,
 )
@@ -27,7 +28,12 @@ from .coordinator import (
 from .clever.clever import Evse
 
 SUB_PLATFORMS = [Platform.SENSOR]
-EVSE_PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH]
+EVSE_PLATFORMS_WITH_IO_ENABLED = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.SWITCH,
+]
+EVSE_PLATFORMS_WITH_IO_DISABLED = [Platform.SENSOR]
 
 SERVICE_ENABLE_FLEX_SCHEMA = vol.Schema(
     {
@@ -47,7 +53,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.data.setdefault(DOMAIN, {})[entry.entry_id] = evse_coordinator
 
-        await hass.config_entries.async_forward_entry_setups(entry, EVSE_PLATFORMS)
+        if entry.data[CONF_IO_ENABLED] is True:
+            await hass.config_entries.async_forward_entry_setups(
+                entry, EVSE_PLATFORMS_WITH_IO_ENABLED
+            )
+        else:
+            await hass.config_entries.async_forward_entry_setups(
+                entry, EVSE_PLATFORMS_WITH_IO_DISABLED
+            )
 
         async def enable_flex(call: ServiceCall) -> None:
             """Service to enable flex charging."""
@@ -94,9 +107,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Clever API config entry."""
 
     if entry.data[CONF_BOX] is True:
-        unload_ok = await hass.config_entries.async_unload_platforms(
-            entry, EVSE_PLATFORMS
-        )
+        if entry.data[CONF_IO_ENABLED] is True:
+            unload_ok = await hass.config_entries.async_unload_platforms(
+                entry, EVSE_PLATFORMS_WITH_IO_ENABLED
+            )
+        else:
+            unload_ok = await hass.config_entries.async_unload_platforms(
+                entry, EVSE_PLATFORMS_WITH_IO_DISABLED
+            )
         if unload_ok:
             hass.data[DOMAIN].pop(entry.entry_id)
         if not hass.data[DOMAIN]:

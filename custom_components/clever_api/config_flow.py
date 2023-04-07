@@ -17,6 +17,7 @@ from .const import (
     CONF_BOX_ID,
     CONF_CONNECTOR_ID,
     CONF_SUBSCRIPTION_FEE,
+    CONF_IO_ENABLED,
 )
 from .clever.clever import Auth, Subscription
 
@@ -44,6 +45,7 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     box_charge_id: int = None
     box_connector_id: int = None
     subscription_fee: float = None
+    io_enabled: bool
 
     def __init__(self) -> None:
         """Initialize Clever API flow"""
@@ -132,6 +134,11 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 self.box_charge_id = resp.data[0].charge_box_id
                 self.box_connector_id = resp.data[0].connector_id
 
+                if resp.data[0].smart_charging_is_enabled is True:
+                    self.io_enabled = True
+                else:
+                    self.io_enabled = False
+
             return await self.async_step_misc()
 
         return self.async_show_form(
@@ -157,6 +164,7 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_BOX_ID: self.box_charge_id,
                 CONF_CONNECTOR_ID: self.box_connector_id,
                 CONF_SUBSCRIPTION_FEE: self.subscription_fee,
+                CONF_IO_ENABLED: self.io_enabled,
             }
 
             return self.async_create_entry(title=self.email, data=data)
