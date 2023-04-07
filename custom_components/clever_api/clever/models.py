@@ -127,7 +127,7 @@ class EvseInfoData(BaseModel, extra=Extra.ignore):
     smart_charging_is_enabled: bool = Field(..., alias="smartChargingIsEnabled")
     smart_charging_version: str = Field(..., alias="smartChargingVersion")
     smart_charging_data: Any = Field(..., alias="smartChargingData")
-    smart_charging_configuration: EvseInfoDataSmartCharge = Field(
+    smart_charging_configuration: None | EvseInfoDataSmartCharge = Field(
         ..., alias="smartChargingConfiguration"
     )
 

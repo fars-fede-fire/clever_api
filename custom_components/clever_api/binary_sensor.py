@@ -14,7 +14,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, LOGGER
+from .const import DOMAIN, LOGGER, CONF_IO_ENABLED
 from .coordinator import (
     CleverApiEvseData,
     CleverApiEvseUpdateCoordinator,

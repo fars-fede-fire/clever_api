@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN, LOGGER, CONF_BOX_ID, CONF_CONNECTOR_ID
+from .const import DOMAIN, LOGGER, CONF_BOX_ID, CONF_CONNECTOR_ID, CONF_SUBSCRIPTION_FEE
 
 from .clever.models import ModTransactions, Energitillaeg, EvseState, EvseInfo
 from .clever.clever import Evse, Subscription
@@ -21,6 +21,7 @@ class CleverApiSubscriptionData:
 
     transactions: ModTransactions
     energitillaeg: Energitillaeg
+    sub_fee: float
 
 
 class CleverApiSubscriptionUpdateCoordinator(
@@ -48,6 +49,7 @@ class CleverApiSubscriptionUpdateCoordinator(
         return CleverApiSubscriptionData(
             transactions=await self.sub.get_transactions(),
             energitillaeg=await self.sub.get_energitillaeg(),
+            sub_fee=self.config_entry.data[CONF_SUBSCRIPTION_FEE],
         )
 
 
@@ -57,6 +59,7 @@ class CleverApiEvseData:
 
     transactions: ModTransactions
     energitillaeg: Energitillaeg
+    sub_fee: float
     evse_state: EvseState
     evse_info: EvseInfo
 
@@ -94,4 +97,5 @@ class CleverApiEvseUpdateCoordinator(DataUpdateCoordinator[CleverApiEvseData]):
                 box_id=self.config_entry.data[CONF_BOX_ID]
             ),
             energitillaeg=await self.sub.get_energitillaeg(),
+            sub_fee=self.config_entry.data[CONF_SUBSCRIPTION_FEE],
         )
