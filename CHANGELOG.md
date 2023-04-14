@@ -1,4 +1,9 @@
 # Changelog
+
+## 0.2.3 (2023-04-14)
+---
+ - Fixed bug where integration was out of function when Intelligent Opladning was disabled (unconfirmed if fixed as I can not reproduce)
+
 ## 0.2.2 (2023-04-07)
 ---
  - Now possible to add integration with intelligent opladning disabled
