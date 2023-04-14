@@ -44,20 +44,28 @@ BINARY_SENSORS = [
         icon="mdi:radiobox-blank",
         value_fn=lambda x: x.evse_info.data[0].smart_charging_is_enabled,
         attrs={
-            "planned_depature": lambda x: x.evse_info.data[
+            "planned_depature": lambda x: None
+            if x.evse_info.data[0].smart_charging_is_enabled is False
+            else x.evse_info.data[
                 0
             ].smart_charging_configuration.user_configuration.departure_time["time"],
-            "desired_range": lambda x: x.evse_info.data[
+            "desired_range": lambda x: None
+            if x.evse_info.data[0].smart_charging_is_enabled is False
+            else x.evse_info.data[
                 0
             ].smart_charging_configuration.user_configuration.desired_range[
                 "desiredRange"
             ],
-            "configured_effect": lambda x: x.evse_info.data[
+            "configured_effect": lambda x: None
+            if x.evse_info.data[0].smart_charging_is_enabled is False
+            else x.evse_info.data[
                 0
             ].smart_charging_configuration.user_configuration.configured_effect[
                 "phaseCount"
             ],
-            "preheat_enabled": lambda x: x.evse_info.data[
+            "preheat_enabled": lambda x: None
+            if x.evse_info.data[0].smart_charging_is_enabled is False
+            else x.evse_info.data[
                 0
             ].smart_charging_configuration.user_configuration.preheat_in_minutes
             == 30,

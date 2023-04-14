@@ -44,7 +44,9 @@ SWITCHES = [
         key="preheat",
         name="Preheat",
         icon="mdi:radiator",
-        is_on_fn=lambda x: x.evse_info.data[
+        is_on_fn=lambda x: False
+        if x.evse_info.data[0].smart_charging_is_enabled is False
+        else x.evse_info.data[
             0
         ].smart_charging_configuration.user_configuration.preheat_in_minutes
         == 30,
@@ -54,7 +56,9 @@ SWITCHES = [
         key="skip_io",
         name="Skip Intelligent Opladning",
         icon="mdi:fast-forward",
-        is_on_fn=lambda x: x.evse_state.data.charging_plan.boost_status.is_boosted,
+        is_on_fn=lambda x: False
+        if x.evse_info.data[0].smart_charging_is_enabled is False
+        else x.evse_state.data.charging_plan.boost_status.is_boosted,
         set_fn=lambda client, enable: client.set_unlimited_boost(enable=enable),
     ),
 ]

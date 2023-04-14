@@ -28,12 +28,11 @@ from .coordinator import (
 from .clever.clever import Evse
 
 SUB_PLATFORMS = [Platform.SENSOR]
-EVSE_PLATFORMS_WITH_IO_ENABLED = [
+EVSE_PLATFORM = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.SWITCH,
 ]
-EVSE_PLATFORMS_WITH_IO_DISABLED = [Platform.SENSOR]
 
 SERVICE_ENABLE_FLEX_SCHEMA = vol.Schema(
     {
@@ -52,15 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await evse_coordinator.async_config_entry_first_refresh()
 
         hass.data.setdefault(DOMAIN, {})[entry.entry_id] = evse_coordinator
-
-        if entry.data[CONF_IO_ENABLED] is True:
-            await hass.config_entries.async_forward_entry_setups(
-                entry, EVSE_PLATFORMS_WITH_IO_ENABLED
-            )
-        else:
-            await hass.config_entries.async_forward_entry_setups(
-                entry, EVSE_PLATFORMS_WITH_IO_DISABLED
-            )
+        await hass.config_entries.async_forward_entry_setups(entry, EVSE_PLATFORM)
 
         async def enable_flex(call: ServiceCall) -> None:
             """Service to enable flex charging."""
@@ -107,14 +98,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload Clever API config entry."""
 
     if entry.data[CONF_BOX] is True:
-        if entry.data[CONF_IO_ENABLED] is True:
-            unload_ok = await hass.config_entries.async_unload_platforms(
-                entry, EVSE_PLATFORMS_WITH_IO_ENABLED
-            )
-        else:
-            unload_ok = await hass.config_entries.async_unload_platforms(
-                entry, EVSE_PLATFORMS_WITH_IO_DISABLED
-            )
+        unload_ok = await hass.config_entries.async_unload_platforms(
+            entry, EVSE_PLATFORM
+        )
         if unload_ok:
             hass.data[DOMAIN].pop(entry.entry_id)
         if not hass.data[DOMAIN]:

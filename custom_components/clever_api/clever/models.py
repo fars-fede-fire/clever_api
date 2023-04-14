@@ -154,9 +154,9 @@ class EvseStateData(BaseModel, extra=Extra.ignore):
     status: str
     consumed_wh: float = Field(..., alias="consumedWh")
     started: str
-    postponed_until: str = Field(..., alias="postponedUntil")
+    postponed_until: None | str = Field(..., alias="postponedUntil")
     so_c: int = Field(..., alias="soC")
-    charging_plan: EvseStateDataChargingPlan = Field(..., alias="chargingPlan")
+    charging_plan: None | EvseStateDataChargingPlan = Field(..., alias="chargingPlan")
 
 
 class EvseState(CleverBase):
