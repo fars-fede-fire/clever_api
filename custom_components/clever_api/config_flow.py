@@ -1,12 +1,19 @@
 """Config flow for Clever API"""
 
-from typing import Any
+from __future__ import annotations
+
+from typing import Any, Dict
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_EMAIL, CONF_API_KEY, CONF_API_TOKEN
+from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.entity_registry import (
+    async_entries_for_config_entry,
+    async_get,
+)
 
 from .const import (
     DOMAIN,
@@ -21,10 +28,13 @@ from .const import (
 )
 from .clever.clever import Auth, Subscription
 
+REAUTH = "reauth"
+
 EMAIL_SCHEMA = vol.Schema({vol.Required(CONF_EMAIL): str})
 URL_SCHEMA = vol.Schema({vol.Required(CONF_URL): str})
 BOX_SCHEMA = vol.Schema({vol.Required(CONF_BOX): bool})
 MISC_SCHEMA = vol.Schema({vol.Optional(CONF_SUBSCRIPTION_FEE, default=799): int})
+REAUTH_SCHEMA = vol.Schema({vol.Required(REAUTH): bool})
 
 
 class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -50,6 +60,14 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         """Initialize Clever API flow"""
         self.device = None
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> OptionsFlowHandler:
+        """Get the options flow for this handler."""
+        return OptionsFlowHandler(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -171,4 +189,47 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="misc", data_schema=MISC_SCHEMA, errors=errors
+        )
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle options flow for the component."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self.config_entry = config_entry
+        self.options = config_entry.options
+
+    async def async_step_init(self, user_input: None = None) -> FlowResult:
+        """Manage options."""
+        return await self.async_step_reauth()
+
+    async def async_step_reauth(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage reauth."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            if user_input[REAUTH] is True:
+                current_config = self.config_entry.data
+
+                session = async_get_clientsession(self.hass)
+
+                auth = Auth(session=session)
+
+                resp = await auth.obtain_api_token(
+                    user_secret=current_config[CONF_API_TOKEN],
+                    email=current_config[CONF_EMAIL],
+                )
+                LOGGER.debug(current_config[CONF_API_KEY])
+                new_config = current_config.copy()
+                new_config[CONF_API_KEY] = resp.data
+
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, data=new_config
+                )
+                return self.async_create_entry(title="", data={})
+
+        return self.async_show_form(
+            step_id="reauth", data_schema=REAUTH_SCHEMA, errors=errors
         )

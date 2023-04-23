@@ -19,7 +19,7 @@ enable_flex:
         number:
           min: 0
           max: 100
-          step: integer
+          step: 1
           unit_of_measurement: kWh
           mode: box
     phase_count:
@@ -29,7 +29,7 @@ enable_flex:
       example: 3
       selector:
         number:
-          min: 0
+          min: 1
           max: 3
-          step: integer
+          step: 1
           mode: box
