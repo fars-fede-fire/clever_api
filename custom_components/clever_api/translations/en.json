@@ -29,10 +29,10 @@
     },
     "options": {
         "step": {
-            "init": {
-                "title": "Clever Home Charger",
+            "reauth": {
+                "title": "Reauth Clever",
                 "data": {
-                    "box": "Add a Clever Home Charger?"
+                    "reauth": "Reauthenticate to Clever?"
                 }
             }
         }

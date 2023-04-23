@@ -58,6 +58,7 @@ SWITCHES = [
         icon="mdi:fast-forward",
         is_on_fn=lambda x: False
         if x.evse_info.data[0].smart_charging_is_enabled is False
+        or x.evse_state.data is None
         else x.evse_state.data.charging_plan.boost_status.is_boosted,
         set_fn=lambda client, enable: client.set_unlimited_boost(enable=enable),
     ),

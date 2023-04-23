@@ -20,7 +20,9 @@ I take no responsibility in using this custom component
 This is a beta release - a lot of work is still to be done!
 
 ### TODO:
-- Reauth
+
+
+- &#9745; Reauth
 
 
 
