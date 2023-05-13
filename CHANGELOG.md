@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.4.2 (2023-05-13)
+---
+ - Deleted a couple of unused fields in the UserInfoData model because of validation errors for some users. These fields were not at use in the integration.
+
 ## 0.2.4 (2023-04-22)
 ---
  - Reauth using options flow.

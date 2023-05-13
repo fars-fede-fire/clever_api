@@ -38,22 +38,14 @@ class ObtainApiToken(CleverBase):
     data: Any = None
 
 
-class UserInfoData(BaseModel):
+class UserInfoData(BaseModel, extra=Extra.ignore):
     """Object holding data of user info"""
 
     firstname: str
     lastname: str
     email: str
     id: str
-    ch_ade_mo: bool = Field(..., alias="chAdeMO")
-    ccs: bool
-    type2_slow: bool = Field(..., alias="type2Slow")
-    type2_fast: bool = Field(..., alias="type2Fast")
     customer_id: str = Field(..., alias="customerId")
-    app_push_token: str = Field(..., alias="appPushToken")
-    car_model: str = Field(..., alias="carModel")
-    car_make: str = Field(..., alias="carMake")
-    car_type_id: str = Field(..., alias="carTypeId")
 
 
 class UserInfo(CleverBase):
