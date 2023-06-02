@@ -89,14 +89,14 @@ class Auth(Clever):
 
     async def send_auth_email(self, email: str) -> SendEmail:
         """Request a verify login email from Clever"""
-        url = f"https://mobileapp-backend.clever.dk/api/mobile/customer/verifyEmail?email={email}"
+        
         resp = await self._request(url)
         return SendEmail.parse_obj(resp)
 
     async def verify_link(self, auth_link: str, email: str) -> VerifyLink:
         """Obtain secretCode send to email."""
         secret_code = URL(auth_link).query["secretCode"]
-        url = f"https://mobileapp-backend.clever.dk/api/mobile/customer/verifySignupToken?token={secret_code}&email={email}"
+        url = "censored"
 
         resp = await self._request(url)
         resp["secret_code"] = secret_code
@@ -111,7 +111,7 @@ class Auth(Clever):
     ) -> ObtainUserSecret:
         """Exchange secret_code for user_secret."""
 
-        url = f"https://mobileapp-backend.clever.dk/api//v2/customer/registerProfile"
+        url = "censored"
         payload = {
             "email": email,
             "firstName": first_name,
@@ -128,7 +128,7 @@ class Auth(Clever):
     async def obtain_api_token(self, user_secret: str, email: str):
         """Exchange user_secret for api_token."""
 
-        url = f"https://mobileapp-backend.clever.dk/api/mobile/customer/loginWithSecretCode?secret={user_secret}&email={email}"
+        url = "censored"
         resp = await self._request(url)
         model = ObtainApiToken.parse_obj(resp)
         if model.data is None:
@@ -146,14 +146,14 @@ class Subscription(Clever):
     async def get_user_info(self) -> UserInfo:
         """Get info of user"""
 
-        url = f"https://mobileapp-backend.clever.dk/api//v2/customer/{self.api_token}/getProfile?"
+        url = "censored"
         resp = await self._request(url)
         model = UserInfo.parse_obj(resp)
         return model
 
     async def get_transactions(self, box_id=None) -> Transactions:
         """Get charging transactions"""
-        url = f"https://mobileapp-backend.clever.dk/api//v2/consumption/{self.api_token}/history"
+        url = "censored"
         resp = await self._request(url)
         model = Transactions.parse_obj(resp)
         today = datetime.today()
@@ -196,14 +196,14 @@ class Subscription(Clever):
 
     async def get_evse_info(self) -> EvseInfo:
         """Get info about EVSE"""
-        url = f"https://mobileapp-backend.clever.dk/api//v3/{self.api_token}/installations?"
+        url = "censored"
         resp = await self._request(url)
         model = EvseInfo.parse_obj(resp)
         return model
 
     async def get_energitillaeg(self) -> Energitillaeg:
         """Get energitillaeg."""
-        url = f"https://mobileapp-backend.clever.dk/api/v3/energysurcharge/{self.api_token}/estimatedenergysurcharge?"
+        url = "censored"
         resp = await self._request(url)
         model = Energitillaeg.parse_obj(resp)
         return model
@@ -219,7 +219,7 @@ class Evse(Clever):
 
     async def get_evse_state(self) -> EvseState:
         """Get state of EVSE"""
-        url = f"https://mobileapp-backend.clever.dk/api//v4/transactions/{self.api_token}/{self.box_id}/connector/{self.connector_id}?chargepointId={self.box_id}&connector={self.connector_id}"
+        url = "censored"
         resp = await self._request(url)
         model = EvseState.parse_obj(resp)
         return model
@@ -229,7 +229,7 @@ class Evse(Clever):
     ) -> None:
         """Enable or disable flex charging"""
         if enable is True:
-            url = f"https://mobileapp-backend.clever.dk/api//v3/flex/{self.api_token}/chargepoints/{self.box_id}/connectors/{self.connector_id}/migrate?"
+            url = "censored"
             data = {
                 "configuredEffect": {"phaseCount": effect},
                 "departureTime": {"time": dept_time},
@@ -240,7 +240,7 @@ class Evse(Clever):
 
             return resp
         else:
-            url = f"https://mobileapp-backend.clever.dk/api//v3/flex/{self.api_token}/chargepoints/{self.box_id}/connectors/{self.connector_id}/enable?"
+            url = "censored"
             data = {"enable": False}
 
             await self._request(url, method=METH_POST, data=data)
@@ -248,38 +248,38 @@ class Evse(Clever):
     async def set_climate(self, enable: bool = None) -> None:
         """Set climate start"""
         if enable is True:
-            url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/settings/preheat?enable=true"
+            url = "censored"
             await self._request(url, method=METH_POST)
         else:
-            url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/settings/preheat?enable=false"
+            url = "censored"
             await self._request(url, method=METH_POST)
 
     async def set_unlimited_boost(self, enable: bool = None) -> None:
         """Skip smart charging for this session"""
         if enable is True:
-            url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/boost?"
+            url = "censored"
             await self._request(url, method=METH_POST)
         else:
             await self.disable_boost()
 
     async def set_timed_boost(self) -> None:
         """Skip smart charging for 30 minutes"""
-        url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/timebox-boost?"
+        url = "censored"
         await self._request(url, method=METH_POST)
 
     async def disable_boost(self) -> None:
         """Return to smart charging."""
-        url = f"https://mobileapp-backend.clever.dk/api//v4/smartcharging/{self.api_token}/chargePoints/{self.box_id}/connectors/{self.connector_id}/unboost?"
+        url = "censored"
         await self._request(url, method=METH_POST)
 
     async def set_kwh(self, kwh: int = None) -> None:
         """Set kWh need for smart charging"""
-        url = f"https://mobileapp-backend.clever.dk/api//v3/flex/{self.api_token}/chargepoints/{self.box_id}/connectors/{self.connector_id}/range"
+        url = "censored"
         data = {"range": kwh}
         await self._request(url, method=METH_POST, data=data)
 
     async def set_dept_time(self, dept_time: str = None) -> None:
         """Set depature time for smart charging in format HH:MM"""
-        url = f"https://mobileapp-backend.clever.dk/api//v3/flex/{self.api_token}/chargepoints/{self.box_id}/connectors/{self.connector_id}/schedule"
+        url = "censored"
         data = {"time": dept_time}
         await self._request(url, method=METH_POST, data=data)
