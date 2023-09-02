@@ -130,7 +130,7 @@ class Auth(Clever):
         self, email: str, first_name: str, last_name: str, secret_code: str
     ) -> ObtainUserSecret:
         """Exchange secret_code for user_secret."""
-
+        
         url = OBTAIN_USER_SECRET
         payload = {
             "email": email,
@@ -173,6 +173,7 @@ class Subscription(Clever):
 
     async def get_transactions(self, box_id=None) -> Transactions:
         """Get charging transactions"""
+
         url = GET_TRANSACTIONS
         resp = await self._request(url)
         model = Transactions.parse_obj(resp)
@@ -280,16 +281,19 @@ class Evse(Clever):
 
     async def set_timed_boost(self) -> None:
         """Skip smart charging for 30 minutes"""
+
         url = SET_TIMED_BOOST
         await self._request(url, method=METH_POST)
 
     async def disable_boost(self) -> None:
         """Return to smart charging."""
+
         url = DISABLE_BOOST
         await self._request(url, method=METH_POST)
 
     async def set_kwh(self, kwh: int = None) -> None:
         """Set kWh need for smart charging"""
+
         url = SET_KWH
         data = {"range": kwh}
         await self._request(url, method=METH_POST, data=data)
