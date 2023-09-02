@@ -29,6 +29,26 @@ from .models import (
     Energitillaeg,
 )
 
+from .urls import (
+    SEND_AUTH_EMAIL,
+    VERIFY_LINK,
+    OBTAIN_USER_SECRET,
+    OBTAIN_API_TOKEN,
+    GET_USER_INFO,
+    GET_TRANSACTIONS,
+    GET_EVSE_INFO,
+    GET_ENERGITILLAEG,
+    GET_EVSE_STATE,
+    SET_FLEX_ON,
+    SET_FLEX_OFF,
+    SET_CLIMATE,
+    SET_UNLIMITED_BOOST,
+    SET_TIMED_BOOST,
+    DISABLE_BOOST,
+    SET_KWH,
+    SET_DEPT_TIME,
+)
+
 
 @dataclass
 class Clever:
@@ -89,14 +109,14 @@ class Auth(Clever):
 
     async def send_auth_email(self, email: str) -> SendEmail:
         """Request a verify login email from Clever"""
-        
+        url = SEND_AUTH_EMAIL
         resp = await self._request(url)
         return SendEmail.parse_obj(resp)
 
     async def verify_link(self, auth_link: str, email: str) -> VerifyLink:
         """Obtain secretCode send to email."""
         secret_code = URL(auth_link).query["secretCode"]
-        url = "censored"
+        url = VERIFY_LINK
 
         resp = await self._request(url)
         resp["secret_code"] = secret_code
@@ -110,8 +130,8 @@ class Auth(Clever):
         self, email: str, first_name: str, last_name: str, secret_code: str
     ) -> ObtainUserSecret:
         """Exchange secret_code for user_secret."""
-
-        url = "censored"
+        
+        url = OBTAIN_USER_SECRET
         payload = {
             "email": email,
             "firstName": first_name,
@@ -128,7 +148,7 @@ class Auth(Clever):
     async def obtain_api_token(self, user_secret: str, email: str):
         """Exchange user_secret for api_token."""
 
-        url = "censored"
+        url = OBTAIN_API_TOKEN
         resp = await self._request(url)
         model = ObtainApiToken.parse_obj(resp)
         if model.data is None:
@@ -146,14 +166,15 @@ class Subscription(Clever):
     async def get_user_info(self) -> UserInfo:
         """Get info of user"""
 
-        url = "censored"
+        url = GET_USER_INFO
         resp = await self._request(url)
         model = UserInfo.parse_obj(resp)
         return model
 
     async def get_transactions(self, box_id=None) -> Transactions:
         """Get charging transactions"""
-        url = "censored"
+
+        url = GET_TRANSACTIONS
         resp = await self._request(url)
         model = Transactions.parse_obj(resp)
         today = datetime.today()
@@ -196,14 +217,14 @@ class Subscription(Clever):
 
     async def get_evse_info(self) -> EvseInfo:
         """Get info about EVSE"""
-        url = "censored"
+        url = GET_EVSE_INFO
         resp = await self._request(url)
         model = EvseInfo.parse_obj(resp)
         return model
 
     async def get_energitillaeg(self) -> Energitillaeg:
         """Get energitillaeg."""
-        url = "censored"
+        url = GET_ENERGITILLAEG
         resp = await self._request(url)
         model = Energitillaeg.parse_obj(resp)
         return model
@@ -219,7 +240,7 @@ class Evse(Clever):
 
     async def get_evse_state(self) -> EvseState:
         """Get state of EVSE"""
-        url = "censored"
+        url = GET_EVSE_STATE
         resp = await self._request(url)
         model = EvseState.parse_obj(resp)
         return model
@@ -229,7 +250,7 @@ class Evse(Clever):
     ) -> None:
         """Enable or disable flex charging"""
         if enable is True:
-            url = "censored"
+            url = SET_FLEX_ON
             data = {
                 "configuredEffect": {"phaseCount": effect},
                 "departureTime": {"time": dept_time},
@@ -240,46 +261,45 @@ class Evse(Clever):
 
             return resp
         else:
-            url = "censored"
+            url = SET_FLEX_OFF
             data = {"enable": False}
 
             await self._request(url, method=METH_POST, data=data)
 
     async def set_climate(self, enable: bool = None) -> None:
         """Set climate start"""
-        if enable is True:
-            url = "censored"
-            await self._request(url, method=METH_POST)
-        else:
-            url = "censored"
-            await self._request(url, method=METH_POST)
+        url = SET_CLIMATE
+        await self._request(url, method=METH_POST)
 
     async def set_unlimited_boost(self, enable: bool = None) -> None:
         """Skip smart charging for this session"""
         if enable is True:
-            url = "censored"
+            url = SET_UNLIMITED_BOOST
             await self._request(url, method=METH_POST)
         else:
             await self.disable_boost()
 
     async def set_timed_boost(self) -> None:
         """Skip smart charging for 30 minutes"""
-        url = "censored"
+
+        url = SET_TIMED_BOOST
         await self._request(url, method=METH_POST)
 
     async def disable_boost(self) -> None:
         """Return to smart charging."""
-        url = "censored"
+
+        url = DISABLE_BOOST
         await self._request(url, method=METH_POST)
 
     async def set_kwh(self, kwh: int = None) -> None:
         """Set kWh need for smart charging"""
-        url = "censored"
+
+        url = SET_KWH
         data = {"range": kwh}
         await self._request(url, method=METH_POST, data=data)
 
     async def set_dept_time(self, dept_time: str = None) -> None:
         """Set depature time for smart charging in format HH:MM"""
-        url = "censored"
+        url = SET_DEPT_TIME
         data = {"time": dept_time}
         await self._request(url, method=METH_POST, data=data)
