@@ -66,7 +66,7 @@ class Clever:
     ) -> dict[str, Any]:
         """Handle request to Clever backend"""
 
-        headers = {"x-api-key": "Basic bW9iaWxlYXBwOmFwaWtleQ==", "authorization": "Basic bW9iaWxlYXBwOmFwaWtleQ==", "user-agent": "Clever/2 CFNetwork/1410.0.3 Darwin/22.6.0"}
+        headers = {"x-api-key": "Basic bW9iaWxlYXBwOmFwaWtleQ==", "authorization": "Basic bW9iaWxlYXBwOmFwaWtleQ==", "user-agent": "Clever/2 CFNetwork/1410.0.3 Darwin/22.6.0", "content-type": "application/json", "accept": "*/*", "app-version": "3.8.1", "app-os": "17.0", "app-platform": "iOS", "app-device": "iPhone12,1", "accept-language": "da-DK,da;q=0.9", "accept-encoding": "gzip, deflate, br", "Host": ""}
 
         if self.session is None:
             self.session = ClientSession()
