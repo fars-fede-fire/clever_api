@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from urllib.parse import unquote
+
 from typing import Any, Dict
 import voluptuous as vol
 
@@ -24,6 +26,10 @@ from .const import (
     CONF_BOX_ID,
     CONF_CONNECTOR_ID,
     CONF_SUBSCRIPTION_FEE,
+)
+
+from .clever.urls import (
+    VERIFY_LINK_CUTOFF,
 )
 from .clever.clever import Auth, Subscription
 
@@ -95,6 +101,8 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             self.url = user_input[CONF_URL]
+            self.url = unquote(self.url)
+            self.url = self.url.replace(VERIFY_LINK_CUTOFF, '')
             session = async_get_clientsession(self.hass)
 
             auth = Auth(session=session)
