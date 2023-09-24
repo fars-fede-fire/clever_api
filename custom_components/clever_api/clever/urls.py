@@ -1,5 +1,4 @@
 SEND_AUTH_EMAIL = "censored"
-VERIFY_LINK_CUTOFF = "censored"
 VERIFY_LINK = "censored"
 OBTAIN_USER_SECRET = "censored"
 OBTAIN_API_TOKEN = "censored"

@@ -28,9 +28,6 @@ from .const import (
     CONF_SUBSCRIPTION_FEE,
 )
 
-from .clever.urls import (
-    VERIFY_LINK_CUTOFF,
-)
 from .clever.clever import Auth, Subscription
 
 REAUTH = "reauth"
@@ -102,7 +99,12 @@ class CleverApiConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self.url = user_input[CONF_URL]
             self.url = unquote(self.url)
-            self.url = self.url.replace(VERIFY_LINK_CUTOFF, '')
+            # A bit hacky, but this does the trick.
+            # The url contains 2 urls. We only need the second
+            # url for this step.
+            self.url = self.url.partition("https") # Search for first https and cut everything in front off.
+            self.url = self.url[2].partition("https") # Search for https again in the new string.
+            self.url = self.url[1] + self.url[2] # partition split the string up in 3 parts. We need the first (https) and the second.
             session = async_get_clientsession(self.hass)
 
             auth = Auth(session=session)
