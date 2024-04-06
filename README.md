@@ -21,6 +21,8 @@ I take no responsibility in using this custom component
 
 This is a beta release - a lot of work is still to be done!
 
+To get the content for the urls.py file, you can use something like mitmproxy to sniff the urls
+
 ### TODO:
 
 
